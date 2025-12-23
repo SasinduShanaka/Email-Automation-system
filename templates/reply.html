@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manual Reply</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h2>Reply to Email</h2>
+
+<p><strong>From:</strong> {{ email.sender }}</p>
+<p><strong>Subject:</strong> {{ email.subject }}</p>
+<p><strong>Message:</strong></p>
+<p style="background:#f4f4f4;padding:10px;">
+    {{ email.body }}
+</p>
+
+<form method="POST">
+    <textarea name="reply" rows="8" style="width:100%;" required></textarea>
+    <br><br>
+    <button type="submit">Send Reply</button>
+</form>
+
+</body>
+</html>
