@@ -2,32 +2,113 @@
 <html>
 <head>
     <title>Email Automation Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="10">
     <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<h1>Email Automation Dashboard</h1>
+<!-- Professional Navigation Bar -->
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <span class="logo-icon">📧</span>
+            <span class="logo-text">EmailSync Pro</span>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}" class="nav-link active">Dashboard</a>
+            <a href="{{ url_for('analytics') }}" class="nav-link">Analytics</a>
+            <a href="{{ url_for('past_emails') }}" class="nav-link">Email Archive</a>
+        </div>
+    </div>
+</nav>
 
-<table>
-    <tr>
-        <th>Sender</th>
-        <th>Subject</th>
-        <th>Category</th>
-        <th>Priority</th>
-        <th>Status</th>
-    </tr>
+<div class="container">
+    <header>
+        <div class="header-content">
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <p class="subtitle">Real-time email monitoring and automation control center</p>
+            </div>
+        </div>
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number">{{ emails|length }}</div>
+                <div class="stat-label">Total Emails</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ emails|selectattr('status', 'equalto', 'Auto-replied')|list|length }}</div>
+                <div class="stat-label">Auto-replied</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ emails|selectattr('status', 'equalto', 'Manual action required')|list|length }}</div>
+                <div class="stat-label">Pending Action</div>
+            </div>
+        </div>
+    </header>
 
-    {% for email in emails %}
-    <tr>
-        <td>{{ email.sender }}</td>
-        <td>{{ email.subject }}</td>
-        <td>{{ email.category }}</td>
-        <td>{{ email.priority }}</td>
-        <td>{{ email.status }}</td>
-    </tr>
-    {% endfor %}
-
-</table>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Sender</th>
+                    <th>Subject</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                    <th>Done</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for email in emails %}
+                <tr class="email-row">
+                    <td>
+                        <div class="sender-cell">
+                            <div class="avatar">{{ email.sender[0]|upper }}</div>
+                            <span>{{ email.sender }}</span>
+                        </div>
+                    </td>
+                    <td class="subject-cell">{{ email.subject }}</td>
+                    <td>
+                        <span class="badge badge-{{ email.category|lower|replace(' ', '-') }}">
+                            {{ email.category }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="priority priority-{{ email.priority|lower }}">
+                            {{ email.priority }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status status-{{ 'auto' if email.status == 'Auto-replied' else 'manual' }}">
+                            {{ email.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if email.status == "Manual action required" %}
+                            <a href="{{ url_for('manual_reply', email_id=email.id) }}" class="btn-reply">
+                                Reply ✉️
+                            </a>
+                        {% else %}
+                            <span class="no-action">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ url_for('mark_done', email_id=email.id) }}" style="margin: 0;">
+                            <button type="submit" class="btn-check" title="Mark as done">
+                                ✓
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
 </body>
 </html>
