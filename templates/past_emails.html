@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Past Emails - Email Automation</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Professional Navigation Bar -->
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <span class="logo-icon">📧</span>
+            <span class="logo-text">EmailSync Pro</span>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+            <a href="{{ url_for('analytics') }}" class="nav-link">Analytics</a>
+            <a href="{{ url_for('past_emails') }}" class="nav-link active">Email Archive</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header-section">
+        <h1 class="page-title">Email Archive</h1>
+        <p class="page-description">Browse and search through all your emails</p>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="filter-bar">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search emails by sender, subject, or content...">
+        <div class="filter-info">
+            <span class="email-count">Total: <strong>{{ emails|length }}</strong> emails</span>
+        </div>
+    </div>
+
+    <!-- Email List -->
+    <div class="email-list">
+        {% for email in emails %}
+        <div class="email-item" data-searchable="{{ email.sender|lower }} {{ email.subject|lower }} {{ email.body|lower }}">
+            <div class="email-header">
+                <div class="email-sender">
+                    <div class="avatar">{{ email.sender[0]|upper }}</div>
+                    <div class="sender-info">
+                        <div class="sender-name">{{ email.sender }}</div>
+                        <div class="email-date">{{ email.date }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="email-subject">
+                <strong>Subject:</strong> {{ email.subject }}
+            </div>
+            <div class="email-preview">
+                {{ email.body[:200] }}{% if email.body|length > 200 %}...{% endif %}
+            </div>
+            <button class="btn-expand" onclick="toggleEmail(this)">Show More ▼</button>
+            <div class="email-full-body" style="display: none;">
+                <div class="full-body-content">
+                    {{ email.body }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not emails %}
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h2>No Emails Found</h2>
+        <p>There are no emails in your inbox yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const emailItems = document.querySelectorAll('.email-item');
+
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        
+        emailItems.forEach(item => {
+            const searchableText = item.getAttribute('data-searchable');
+            if (searchableText.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Toggle email body
+    function toggleEmail(button) {
+        const emailItem = button.closest('.email-item');
+        const fullBody = emailItem.querySelector('.email-full-body');
+        
+        if (fullBody.style.display === 'none') {
+            fullBody.style.display = 'block';
+            button.textContent = 'Show Less ▲';
+            button.classList.add('expanded');
+        } else {
+            fullBody.style.display = 'none';
+            button.textContent = 'Show More ▼';
+            button.classList.remove('expanded');
+        }
+    }
+</script>
+
+</body>
+</html>
