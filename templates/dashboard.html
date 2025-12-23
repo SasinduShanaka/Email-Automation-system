@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Automation Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>Email Automation Dashboard</h1>
+
+<table>
+    <tr>
+        <th>Sender</th>
+        <th>Subject</th>
+        <th>Category</th>
+        <th>Priority</th>
+        <th>Status</th>
+    </tr>
+
+    {% for email in emails %}
+    <tr>
+        <td>{{ email.sender }}</td>
+        <td>{{ email.subject }}</td>
+        <td>{{ email.category }}</td>
+        <td>{{ email.priority }}</td>
+        <td>{{ email.status }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>
