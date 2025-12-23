@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analytics - Email Automation</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- Professional Navigation Bar -->
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <span class="logo-icon">📧</span>
+            <span class="logo-text">EmailSync Pro</span>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+            <a href="{{ url_for('analytics') }}" class="nav-link active">Analytics</a>
+            <a href="{{ url_for('past_emails') }}" class="nav-link">Email Archive</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header-section">
+        <h1 class="page-title">Analytics & Insights</h1>
+        <p class="page-description">Comprehensive analysis of your email automation performance</p>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-icon">📧</div>
+            <div class="metric-content">
+                <div class="metric-value">{{ emails|length }}</div>
+                <div class="metric-label">Total Emails</div>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon">✅</div>
+            <div class="metric-content">
+                <div class="metric-value">{{ emails|selectattr('status', 'equalto', 'Auto-replied')|list|length }}</div>
+                <div class="metric-label">Auto-replied</div>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon">⏳</div>
+            <div class="metric-content">
+                <div class="metric-value">{{ emails|selectattr('status', 'equalto', 'Manual action required')|list|length }}</div>
+                <div class="metric-label">Pending Action</div>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon">📈</div>
+            <div class="metric-content">
+                <div class="metric-value">{{ ((emails|selectattr('status', 'equalto', 'Auto-replied')|list|length / emails|length * 100) if emails|length > 0 else 0)|round(0)|int }}%</div>
+                <div class="metric-label">Automation Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="analytics-section">
+        <div class="charts-grid">
+            <div class="chart-card large">
+                <h3 class="chart-title">Category Distribution</h3>
+                <canvas id="categoryChart"></canvas>
+            </div>
+            <div class="chart-card large">
+                <h3 class="chart-title">Priority Breakdown</h3>
+                <canvas id="priorityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status and Response -->
+    <div class="analytics-section">
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">Status Overview</h3>
+                <canvas id="statusChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">Response Rate</h3>
+                <div class="progress-stats">
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span>Auto-replied</span>
+                            <span class="percentage">{{ ((emails|selectattr('status', 'equalto', 'Auto-replied')|list|length / emails|length * 100) if emails|length > 0 else 0)|round(1) }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ ((emails|selectattr('status', 'equalto', 'Auto-replied')|list|length / emails|length * 100) if emails|length > 0 else 0)|round(1) }}%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span>Manual Action Required</span>
+                            <span class="percentage">{{ ((emails|selectattr('status', 'equalto', 'Manual action required')|list|length / emails|length * 100) if emails|length > 0 else 0)|round(1) }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill manual" style="width: {{ ((emails|selectattr('status', 'equalto', 'Manual action required')|list|length / emails|length * 100) if emails|length > 0 else 0)|round(1) }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Breakdown -->
+    <div class="analytics-section">
+        <h2 class="section-title">Detailed Breakdown</h2>
+        <div class="breakdown-grid">
+            <div class="breakdown-card">
+                <h4>Categories</h4>
+                <ul class="breakdown-list">
+                    {% set categories = {} %}
+                    {% for email in emails %}
+                        {% if categories.update({email.category: categories.get(email.category, 0) + 1}) %}{% endif %}
+                    {% endfor %}
+                    {% for category, count in categories.items() %}
+                    <li>
+                        <span class="breakdown-label">{{ category }}</span>
+                        <span class="breakdown-value">{{ count }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="breakdown-card">
+                <h4>Priorities</h4>
+                <ul class="breakdown-list">
+                    {% set priorities = {} %}
+                    {% for email in emails %}
+                        {% if priorities.update({email.priority: priorities.get(email.priority, 0) + 1}) %}{% endif %}
+                    {% endfor %}
+                    {% for priority, count in priorities.items() %}
+                    <li>
+                        <span class="breakdown-label">{{ priority }}</span>
+                        <span class="breakdown-value">{{ count }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="breakdown-card">
+                <h4>Status</h4>
+                <ul class="breakdown-list">
+                    {% set statuses = {} %}
+                    {% for email in emails %}
+                        {% if statuses.update({email.status: statuses.get(email.status, 0) + 1}) %}{% endif %}
+                    {% endfor %}
+                    {% for status, count in statuses.items() %}
+                    <li>
+                        <span class="breakdown-label">{{ status }}</span>
+                        <span class="breakdown-value">{{ count }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Prepare data from Flask
+    const emails = {{ emails|tojson }};
+    
+    // Chart configuration
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 15,
+                    font: {
+                        family: 'Inter',
+                        size: 12
+                    }
+                }
+            }
+        }
+    };
+
+    // Category Chart
+    const categoryData = {};
+    emails.forEach(email => {
+        categoryData[email.category] = (categoryData[email.category] || 0) + 1;
+    });
+
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(categoryData),
+            datasets: [{
+                data: Object.values(categoryData),
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(251, 191, 36, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(99, 102, 241, 0.8)'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            ...chartOptions,
+            cutout: '60%'
+        }
+    });
+
+    // Priority Chart
+    const priorityData = {};
+    emails.forEach(email => {
+        priorityData[email.priority] = (priorityData[email.priority] || 0) + 1;
+    });
+
+    new Chart(document.getElementById('priorityChart'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(priorityData),
+            datasets: [{
+                label: 'Emails',
+                data: Object.values(priorityData),
+                backgroundColor: [
+                    'rgba(220, 38, 38, 0.8)',
+                    'rgba(234, 88, 12, 0.8)',
+                    'rgba(5, 150, 105, 0.8)'
+                ],
+                borderRadius: 8,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Status Chart
+    const statusData = {};
+    emails.forEach(email => {
+        statusData[email.status] = (statusData[email.status] || 0) + 1;
+    });
+
+    new Chart(document.getElementById('statusChart'), {
+        type: 'pie',
+        data: {
+            labels: Object.keys(statusData),
+            datasets: [{
+                data: Object.values(statusData),
+                backgroundColor: [
+                    'rgba(5, 150, 105, 0.8)',
+                    'rgba(234, 88, 12, 0.8)'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: chartOptions
+    });
+</script>
+
+</body>
+</html>
