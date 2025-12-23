@@ -4,7 +4,6 @@
     <title>Email Automation Dashboard</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="10">
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -21,6 +20,9 @@
             <a href="{{ url_for('dashboard') }}" class="nav-link active">Dashboard</a>
             <a href="{{ url_for('analytics') }}" class="nav-link">Analytics</a>
             <a href="{{ url_for('past_emails') }}" class="nav-link">Email Archive</a>
+            <button onclick="window.location.reload()" class="btn-refresh" title="Refresh emails">
+                🔄 Refresh
+            </button>
         </div>
     </div>
 </nav>

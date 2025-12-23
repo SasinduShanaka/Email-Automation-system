@@ -91,6 +91,25 @@ body {
     color: var(--white);
 }
 
+.btn-refresh {
+    padding: 10px 20px;
+    background: var(--success);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    margin-left: 10px;
+}
+
+.btn-refresh:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
 .container {
     margin: 0;
     padding: 30px 0;
